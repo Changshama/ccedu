@@ -1,14 +1,20 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 import requests
 import spacy
+# from nltk.corpus import words
+import enchant
+from nltk.stem.snowball import SnowballStemmer
 
+snowBallStemmer = SnowballStemmer("english")
 nlp = spacy.load("en_core_web_sm")
+engword = enchant.Dict("en_US")
 
 def WordList(vid):
   english_most_common_10k = 'https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-usa-no-swears.txt'
   response = requests.get(english_most_common_10k)
   data = response.text
-  set_of_common_words = {x for x in data.split('\n')} 
+  # match with stemmed common words
+  set_of_common_words = {snowBallStemmer.stem(x) for x in data.split('\n')} 
 
   transcript = YouTubeTranscriptApi.get_transcript(vid)
   word_list = ''
@@ -17,10 +23,14 @@ def WordList(vid):
     doc = nlp(sentence.get('text'))
     tokens = [(token.text, token.lemma_) for token in doc if token.pos_ in ["VERB","ADV","ADJ","NOUN"]]
     for token in tokens:
-      if token[1].lower() not in set_of_common_words:
-        word_list += token[0] +'\n'
-        ts_list += str(sentence.get('start')) +'\n'
-        break
+      if snowBallStemmer.stem(token[0].lower()) not in set_of_common_words:
+        # check if it's an English word
+        # nltk check is slow
+        # if token[0].lower() in words.words(): 
+        if engword.check(token[0].lower()): 
+          word_list += token[0] +'\n'
+          ts_list += str(sentence.get('start')) +'\n'
+          break
   return word_list, ts_list
 
 # def video_to_text(vid):
