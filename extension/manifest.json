@@ -21,10 +21,10 @@
 	},
   	"web_accessible_resources": [
   		{
-  		"resources": ["popup.html", "images/icon.png", "css/style.css"],
+  		"resources": ["popup.html", "images/icon.png", "css/style.css", "event.js"],
   		"matches": ["<all_urls>"]
   		}
   	],
-	"permissions": ["activeTab", "storage", "scripting", "tabs", "background"],
+	"permissions": ["webNavigation", "activeTab", "storage", "scripting", "tabs", "background"],
 	"host_permissions": ["<all_urls>"]
 }

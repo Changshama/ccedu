@@ -14,11 +14,11 @@ function getVideoId(url) {
 
 async function start() {
 	// flask server address
-	const url = "https://0294-35-245-75-81.ngrok.io";
+	const url = "https://ffa3-35-232-16-102.ngrok.io";
 
 	let video_url = window.location.toString();
 
-	let video_id = getVideoId(video_url)
+	let video_id = getVideoId(video_url);
 
 	let data = { video_id };
 
@@ -29,9 +29,7 @@ async function start() {
 	});
 	
 	req.json().then((e) => {
-		word = e.ans;
-		//send extracted vocabulary list to popup
-		chrome.runtime.sendMessage(word);
+		chrome.runtime.sendMessage({vocab: e.vocab, ts: e.start_time});
 	});
 	
 }
@@ -41,5 +39,19 @@ chrome.runtime.onMessage.addListener(function(request) {
 					start();
   				open =true;
 			}
-
+		if(request.todo == 'seekTo'){
+			    document.dispatchEvent(
+      			new CustomEvent("seekToSecond", { detail: {
+      					seekTime: request.seconds 
+      				}
+      			})
+    			);
+		}
 });
+
+var s = document.createElement("script");
+s.src = chrome.runtime.getURL("event.js");
+s.onload = function () {
+  this.remove();
+};
+(document.head || document.documentElement).appendChild(s);
